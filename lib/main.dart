@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'utils/theme_manager.dart';
 import 'screens/home_screen.dart';
-import 'screens/favorites_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/favorites_screen.dart';
+import 'widgets/theme_selector.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final themeManager = ThemeManager();
+  await themeManager.loadTheme();
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => themeManager,
+      child: const NewsReaderApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NewsReaderApp extends StatelessWidget {
+  const NewsReaderApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return MaterialApp(
       title: 'News Reader',
       theme: ThemeData(
@@ -20,7 +34,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(brightness: Brightness.dark),
-      themeMode: ThemeMode.system, // Bonus: Dark mode
+      themeMode: themeManager.themeMode,
       debugShowCheckedModeBanner: false,
       home: const MainScreen(),
     );
@@ -81,6 +95,15 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).colorScheme.primary,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (_) => const ThemeSelector(),
+          );
+        },
+        child: const Icon(Icons.color_lens),
       ),
     );
   }
