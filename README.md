@@ -19,7 +19,7 @@ This app allows users to:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/news_reader_app.git
+   git clone https://github.com/Mufeel-Ishad/news_reader_app.git
    cd news_reader_app
    ```
 
@@ -28,13 +28,7 @@ This app allows users to:
    flutter pub get
    ```
 
-3. **Create `.env` file** in the root directory:
-   ```
-   API_KEY=your_actual_newsapi_key_here
-   BASE_URL=https://newsapi.org/v2
-   ```
-
-4. **Run the app**:
+3. **Run the app**:
    ```bash
    flutter run
    ```
@@ -48,20 +42,15 @@ This app allows users to:
 1. Go to [https://newsapi.org/register](https://newsapi.org/register)
 2. Sign up for a free developer account
 3. Copy your API key from the dashboard
-4. Paste it into the `.env` file as shown above
+4. Paste it into the `news_api_service.dart` file
 
 ---
 
 ## 🖼️ Screenshots
 
-Please upload at least 5 screenshots to:
-
 ```
 assets/screenshots/
 ```
-
-You can then embed them below using:
-
 ```markdown
 ![Home Screen](assets/screenshots/home.png)
 ![Detail Screen](assets/screenshots/detail.png)
@@ -93,16 +82,16 @@ You can then embed them below using:
 ## 🐞 Known Issues
 
 - Some articles may have missing or broken image URLs
-- API rate limit: free plan allows only 100 requests/day
 - No pagination currently (loads only first page of headlines/search)
 - Web support not available due to CORS limitations in NewsAPI
+- Fixed browser-opening issues
 
 ---
 
 ## 📌 Notes
 
 - This project was built as part of a practical assessment
-- Tested on Android emulator (Pixel 6) and real device (Samsung A32)
+- Tested on Android real device (Samsung A01)
 
 ---
 
