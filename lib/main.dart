@@ -89,7 +89,11 @@ class _MainScreenState extends State<MainScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: SafeArea(
+        top: true,
+        bottom: false,
+        child: _screens[_selectedIndex],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: _navItems,
         currentIndex: _selectedIndex,

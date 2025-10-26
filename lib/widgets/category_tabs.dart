@@ -26,7 +26,7 @@ class CategoryTabs extends StatelessWidget {
       height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         itemCount: categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
@@ -34,7 +34,10 @@ class CategoryTabs extends StatelessWidget {
           final isSelected = selected == category;
 
           return ChoiceChip(
-            label: Text(category[0].toUpperCase() + category.substring(1)),
+            label: Text(
+              category[0].toUpperCase() + category.substring(1),
+              textAlign: TextAlign.center,
+            ),
             selected: isSelected,
             onSelected: (_) => onChanged(category),
             selectedColor: Theme.of(context).colorScheme.primary,

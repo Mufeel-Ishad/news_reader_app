@@ -4,22 +4,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/article.dart';
 import '../screens/article_detail_screen.dart';
+import '../utils/date_formatter.dart';
 
 class ArticleCard extends StatelessWidget {
   final Article article;
 
   const ArticleCard({super.key, required this.article});
-
-  String _timeAgo(String publishedAt) {
-    final published = DateTime.tryParse(publishedAt);
-    if (published == null) return '';
-    final now = DateTime.now();
-    final diff = now.difference(published);
-
-    if (diff.inMinutes < 60) return '${diff.inMinutes} minutes ago';
-    if (diff.inHours < 24) return '${diff.inHours} hours ago';
-    return DateFormat('MMM dd, yyyy').format(published);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +64,7 @@ class ArticleCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${article.source.name} • ${_timeAgo(article.publishedAt)}',
+                    '${article.source.name} • ${DateFormatter.timeAgo(article.publishedAt)}',
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey),
