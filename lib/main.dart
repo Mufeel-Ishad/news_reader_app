@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/login_screen.dart';
 import 'utils/theme_manager.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
@@ -8,6 +11,7 @@ import 'widgets/theme_selector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   final themeManager = ThemeManager();
   await themeManager.loadTheme();
@@ -36,7 +40,29 @@ class NewsReaderApp extends StatelessWidget {
       darkTheme: ThemeData(brightness: Brightness.dark),
       themeMode: themeManager.themeMode,
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const AuthGate(),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasData) {
+          return const MainScreen();
+        }
+        return const LoginScreen();
+      },
     );
   }
 }
@@ -77,9 +103,6 @@ class _MainScreenState extends State<MainScreen> {
     BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Favorites'),
   ];
 
- 
-
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -89,11 +112,47 @@ class _MainScreenState extends State<MainScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: _screens[_selectedIndex],
+      appBar: AppBar(
+        title: const Text('News Reader'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'theme') {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (_) => const ThemeSelector(),
+                );
+              } else if (value == 'signout') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Sign out'),
+                    content: const Text('Are you sure you want to sign out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Sign out'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await FirebaseAuth.instance.signOut();
+                }
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'theme', child: Text('Theme')),
+              PopupMenuItem(value: 'signout', child: Text('Sign out')),
+            ],
+          ),
+        ],
       ),
+      body: SafeArea(top: true, bottom: false, child: _screens[_selectedIndex]),
       bottomNavigationBar: BottomNavigationBar(
         items: _navItems,
         currentIndex: _selectedIndex,
