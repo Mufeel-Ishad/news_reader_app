@@ -37,6 +37,19 @@ This app allows users to:
 
 ---
 
+## 🔑 Authentication
+
+The app uses Firebase Authentication.
+
+- Sign in and sign up screens are provided.
+- Forgot Password flow:
+   - From the login screen, tap “Forgot password?” → you’ll be taken to the reset screen.
+   - Enter your email and tap “Send reset link”.
+   - Check your inbox and follow the link to set a new password.
+
+Ensure Firebase is initialized (already done in `main.dart`) and your project is configured with valid `google-services.json`/`GoogleService-Info.plist` files.
+
+
 ## 🔐 How to Get API Key
 
 1. Go to [https://newsapi.org/register](https://newsapi.org/register)
