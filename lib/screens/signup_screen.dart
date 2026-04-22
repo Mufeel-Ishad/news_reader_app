@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -39,15 +39,15 @@ class _SignupScreenState extends State<SignupScreen> {
     }
     setState(() => _loading = true);
     try {
-      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await FirebaseService.instance.signUp(
         email: _email.text.trim(),
         password: _password.text,
+        displayName: _name.text,
       );
-      await cred.user?.updateDisplayName(_name.text.trim());
       // AuthGate will navigate to the home screen when auth state updates
       if (mounted) Navigator.of(context).pop();
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Sign up failed');
+    } on AuthFailure catch (e) {
+      _showError(e.message);
     } catch (_) {
       _showError('Sign up failed');
     } finally {
@@ -75,7 +75,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Join News Reader', style: theme.textTheme.headlineMedium,textAlign: TextAlign.center,),
+                  Text(
+                    'Join News Reader',
+                    style: theme.textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _name,
@@ -84,7 +88,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: 'Full name',
                       prefixIcon: Icon(Icons.person),
                     ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Enter your name'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -99,7 +105,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       final value = v?.trim() ?? '';
                       if (value.isEmpty) return 'Enter your email';
                       final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                      if (!emailRegex.hasMatch(value)) return 'Enter a valid email';
+                      if (!emailRegex.hasMatch(value))
+                        return 'Enter a valid email';
                       return null;
                     },
                   ),
@@ -112,8 +119,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePwd ? Icons.visibility : Icons.visibility_off),
-                        onPressed: () => setState(() => _obscurePwd = !_obscurePwd),
+                        icon: Icon(
+                          _obscurePwd ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscurePwd = !_obscurePwd),
                       ),
                     ),
                     validator: (v) {
@@ -132,18 +142,25 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: 'Confirm password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirm ? Icons.visibility : Icons.visibility_off),
-                        onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureConfirm = !_obscureConfirm),
                       ),
                     ),
-                    validator: (v) => v != _password.text ? 'Passwords do not match' : null,
+                    validator: (v) =>
+                        v != _password.text ? 'Passwords do not match' : null,
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Checkbox(
                         value: _acceptTerms,
-                        onChanged: (v) => setState(() => _acceptTerms = v ?? false),
+                        onChanged: (v) =>
+                            setState(() => _acceptTerms = v ?? false),
                       ),
                       const Expanded(
                         child: Text('I agree to the Terms and Privacy Policy'),
@@ -154,7 +171,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   FilledButton(
                     onPressed: _loading ? null : _submit,
                     child: _loading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('Create account'),
                   ),
                   const SizedBox(height: 12),
@@ -163,7 +184,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     children: [
                       const Text('Already have an account?'),
                       TextButton(
-                        onPressed: _loading ? null : () => Navigator.of(context).pop(),
+                        onPressed: _loading
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Sign in'),
                       ),
                     ],

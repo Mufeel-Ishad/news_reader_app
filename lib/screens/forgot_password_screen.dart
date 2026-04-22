@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -26,16 +26,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!form.validate()) return;
     setState(() => _loading = true);
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _email.text.trim(),
-      );
+      await FirebaseService.instance.sendPasswordResetEmail(_email.text.trim());
       if (!mounted) return;
       setState(() => _sent = true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password reset email sent')),
       );
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Reset failed');
+    } on AuthFailure catch (e) {
+      _showError(e.message);
     } catch (_) {
       _showError('Reset failed');
     } finally {
@@ -61,7 +59,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Reset your password', style: theme.textTheme.headlineMedium),
+                Text(
+                  'Reset your password',
+                  style: theme.textTheme.headlineMedium,
+                ),
                 const SizedBox(height: 8),
                 const Text(
                   'Enter the email address associated with your account and we\'ll send you a link to reset your password.',
@@ -82,7 +83,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       final value = v?.trim() ?? '';
                       if (value.isEmpty) return 'Enter your email';
                       final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                      if (!emailRegex.hasMatch(value)) return 'Enter a valid email';
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Enter a valid email';
+                      }
                       return null;
                     },
                   ),
@@ -91,7 +94,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 FilledButton(
                   onPressed: _loading ? null : _sendReset,
                   child: _loading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Send reset link'),
                 ),
                 const SizedBox(height: 16),

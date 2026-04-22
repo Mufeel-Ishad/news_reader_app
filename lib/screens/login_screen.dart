@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_service.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -25,51 +25,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signIn() async {
     setState(() => _loading = true);
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseService.instance.signIn(
         email: _email.text.trim(),
         password: _password.text,
       );
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Sign in failed');
+    } on AuthFailure catch (e) {
+      _showError(e.message);
     } catch (_) {
       _showError('Sign in failed');
     } finally {
       if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _register() async {
-    setState(() => _loading = true);
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Registration failed');
-    } catch (_) {
-      _showError('Registration failed');
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _reset() async {
-    final email = _email.text.trim();
-    if (email.isEmpty) {
-      _showError('Enter your email to reset');
-      return;
-    }
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent')),
-      );
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Reset failed');
-    } catch (_) {
-      _showError('Reset failed');
     }
   }
 
@@ -94,9 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
-                  
                   decoration: const InputDecoration(
-                    focusColor: Colors.white,                    labelText: 'Email',
+                    focusColor: Colors.white,
+                    labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                   ),
                 ),
@@ -108,7 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _obscure ? Icons.visibility : Icons.visibility_off,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -120,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _loading
                         ? null
                         : () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ForgotPasswordScreen(),
-                              ),
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen(),
                             ),
+                          ),
                     child: const Text('Forgot password?'),
                   ),
                 ),
@@ -150,10 +117,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _loading
                           ? null
                           : () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const SignupScreen(),
-                                ),
+                              MaterialPageRoute(
+                                builder: (_) => const SignupScreen(),
                               ),
+                            ),
                       child: const Text('Create account'),
                     ),
                   ],

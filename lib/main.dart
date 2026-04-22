@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'services/firebase_service.dart';
 import 'screens/login_screen.dart';
 import 'utils/theme_manager.dart';
 import 'screens/home_screen.dart';
@@ -11,7 +10,7 @@ import 'widgets/theme_selector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await FirebaseService.instance.initialize();
 
   final themeManager = ThemeManager();
   await themeManager.loadTheme();
@@ -50,15 +49,15 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+    return StreamBuilder<bool>(
+      stream: FirebaseService.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (snapshot.hasData) {
+        if (snapshot.data == true) {
           return const MainScreen();
         }
         return const LoginScreen();
@@ -141,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 );
                 if (confirm == true) {
-                  await FirebaseAuth.instance.signOut();
+                  await FirebaseService.instance.signOut();
                 }
               }
             },
